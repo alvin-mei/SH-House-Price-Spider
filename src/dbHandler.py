@@ -58,9 +58,10 @@ class dbHandler:
         for param in params:
             vStr.append("'" + MySQLdb.escape_string(str(param)) + "'")
         values = ','.join(vStr)
+        print values
         try:
             self.cursor.execute("""
-                        INSERT INTO cellInfo(cellId, name, regionId)
+                        INSERT INTO cellInfo(cellId, name, address, regionId, url)
                         VALUES(%s)""" % values)
             result = self.conn.insert_id()
             self.conn.commit()
@@ -70,12 +71,12 @@ class dbHandler:
             print exstr
             return 0
 
-    def updateHouseInfo(self, id, currentPrice, perSquarePrice):
+    def updateHouseInfo(self, id, currentPrice, perSquarePrice, downPayment, moneyMonth):
         try:
             result = self.cursor.execute("""
               UPDATE houseInfo
-              SET currentPrice = %d, perSquarePrice = %d
-              WHERE houseId = %d""" %(currentPrice,perSquarePrice,id))
+              SET currentPrice = %d, perSquarePrice = %d, downPayment = %d, moneyMonth = %d
+              WHERE houseId = %d""" %(int(currentPrice), int(perSquarePrice), int(downPayment), int(moneyMonth), int(id)))
             self.conn.commit()
             return result
         except Exception, e:
@@ -90,8 +91,7 @@ class dbHandler:
             self.cursor.execute(
                 """SELECT COUNT(1) FROM houseInfo
                     WHERE houseId = %d
-                    AND status = 0""" %houseId
-            )
+                    AND status = 0""" %int(houseId))
             count = self.cursor.fetchone()[0]
             if count > 0:
                 return True
@@ -107,7 +107,7 @@ class dbHandler:
             self.cursor.execute(
                 """SELECT COUNT(1) FROM cellInfo
                     WHERE cellId = %d
-                    AND status = 0""" % cellId
+                    AND status = 0""" % int(cellId)
             )
             count = self.cursor.fetchone()[0]
             if count > 0:
